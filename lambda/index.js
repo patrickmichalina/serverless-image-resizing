@@ -3,9 +3,16 @@
 const AWS = require('aws-sdk');
 const S3 = new AWS.S3();
 const Sharp = require('sharp');
+var crypto = require('crypto');
 
 const BUCKET = process.env.BUCKET;
 const URL = process.env.URL;
+
+function randomValueHex (len) {
+    return crypto.randomBytes(Math.ceil(len/2))
+        .toString('hex') // convert to hexadecimal format
+        .slice(0,len);   // return required number of characters
+}
 
 exports.handler = function(event, context, callback) {
   const key = event.queryStringParameters.key;
@@ -28,8 +35,8 @@ exports.handler = function(event, context, callback) {
       }).promise()
     )
     .then(() => callback(null, {
-        statusCode: '301',
-        headers: {'location': `${URL}/${key}`},
+        statusCode: '307',
+        headers: {'location': `${URL}/${key}?${randomValueHex(12)}`},
         body: '',
       })
     )
